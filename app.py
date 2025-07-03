@@ -4,7 +4,7 @@ import sys
 
 import numpy as np
 import sounddevice as sd
-import speech_recognition as sr
+from faster_whisper import WhisperModel
 import torch
 from transformers import AutoTokenizer
 
@@ -33,14 +33,9 @@ def record_audio(duration=None):
     return audio.squeeze()
 
 
-def recognize_text(audio):
-    recognizer = sr.Recognizer()
-    audio_data = sr.AudioData(audio.tobytes(), SAMPLE_RATE, 2)
-    try:
-        text = recognizer.recognize_sphinx(audio_data)
-    except sr.UnknownValueError:
-        text = ''
-    return text
+def recognize_text(audio, model):
+    segments, _ = model.transcribe(audio, language='ko')
+    return ''.join(seg.text for seg in segments)
 
 
 def main(args):
@@ -52,11 +47,12 @@ def main(args):
     model.to(device)
     label2id = checkpoint['label2id']
     id2label = {v: k for k, v in label2id.items()}
+    stt_model = WhisperModel(args.whisper_model, device=device)
 
     while True:
         audio = record_audio()
         waveform = torch.tensor(audio, dtype=torch.float32)
-        text = recognize_text(audio)
+        text = recognize_text(audio, stt_model)
         print('Transcription:', text)
 
         inputs = tokenizer(text, return_tensors='pt', padding='max_length', truncation=True, max_length=128)
@@ -75,5 +71,6 @@ if __name__ == '__main__':
     parser.add_argument('--model', required=True)
     parser.add_argument('--text_model', default='distilbert-base-uncased')
     parser.add_argument('--audio_model', default='facebook/wav2vec2-base-960h')
+    parser.add_argument('--whisper_model', default='small')
     args = parser.parse_args()
     main(args)
