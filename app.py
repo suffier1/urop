@@ -7,6 +7,7 @@ import sounddevice as sd
 from faster_whisper import WhisperModel
 import torch
 from transformers import AutoTokenizer
+import noisereduce as nr
 
 from model import AudioTextEmotionModel
 
@@ -29,8 +30,9 @@ def record_audio(duration=None):
                     break
         except KeyboardInterrupt:
             print('Recording stopped.')
-    audio = np.concatenate(frames, axis=0)
-    return audio.squeeze()
+    audio = np.concatenate(frames, axis=0).squeeze()
+    audio = nr.reduce_noise(y=audio, sr=SAMPLE_RATE)
+    return audio
 
 
 def recognize_text(audio, model):
