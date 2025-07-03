@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
-from kemdy_dataset import KemdyDataset
+from emotion_dataset import EmotionDataset
 from model import AudioTextEmotionModel
 
 
@@ -30,8 +30,8 @@ def train(args):
     global tokenizer
     tokenizer = AutoTokenizer.from_pretrained(args.text_model)
 
-    train_ds = KemdyDataset(args.train_csv, tokenizer)
-    valid_ds = KemdyDataset(args.valid_csv, tokenizer, label2id=train_ds.label2id)
+    train_ds = EmotionDataset(args.data_root, split='train', valid_ratio=args.valid_ratio, tokenizer=tokenizer)
+    valid_ds = EmotionDataset(args.data_root, split='valid', valid_ratio=args.valid_ratio, tokenizer=tokenizer, label2id=train_ds.label2id)
     num_labels = len(train_ds.label2id)
 
     model = AudioTextEmotionModel(args.text_model, args.audio_model, num_labels)
@@ -77,8 +77,8 @@ def train(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train_csv', required=True)
-    parser.add_argument('--valid_csv', required=True)
+    parser.add_argument('--data_root', required=True, help='Root directory containing audiodata folders and csv files')
+    parser.add_argument('--valid_ratio', type=float, default=0.1, help='Portion of data used for validation')
     parser.add_argument('--text_model', default='distilbert-base-uncased')
     parser.add_argument('--audio_model', default='facebook/wav2vec2-base-960h')
     parser.add_argument('--output_dir', default='checkpoints')
