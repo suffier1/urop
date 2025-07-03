@@ -16,7 +16,7 @@ This project provides simple scripts to train and test an emotion recognition mo
 Install dependencies (Python 3.12 recommended):
 
 ```bash
-pip install torch transformers datasets pandas sounddevice speechrecognition pocketsphinx tqdm
+pip install torch transformers datasets pandas sounddevice faster-whisper tqdm
 ```
 
 Run training:
@@ -32,10 +32,10 @@ The script saves `model.pt` in the specified output directory.
 After training, run the demo application:
 
 ```bash
-python app.py --model checkpoints/model.pt
+python app.py --model checkpoints/model.pt --whisper_model small
 ```
 
 1. Press `Ctrl+C` to stop recording.
 2. The program prints the recognized text and the predicted emotion.
 
-The demo uses `pocketsphinx` for offline speech recognition. You can replace it with any preferred speech-to-text system by modifying `app.py`.
+The demo now uses `faster-whisper` for Korean speech recognition.
