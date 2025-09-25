@@ -35,3 +35,15 @@ python app.py --model checkpoints/model.pt --whisper_model small
 2. The program prints the recognized text and the predicted emotion.
 
 The demo records your voice, applies noise reduction and transcribes it using `faster-whisper` before predicting the emotion.
+
+## Real-time translation demo
+
+For live lecture translation, run the streaming translator. It listens to the microphone, transcribes speech with Whisper and
+translates the recognized text chunk-by-chunk using a MarianMT model.
+
+```bash
+python translator_app.py --whisper_model small --translation_model Helsinki-NLP/opus-mt-ko-en
+```
+
+Use `--source_language auto` to let Whisper detect the language automatically, adjust `--chunk_duration` to control how often
+new translations appear, and choose any supported MarianMT model for different language pairs.
